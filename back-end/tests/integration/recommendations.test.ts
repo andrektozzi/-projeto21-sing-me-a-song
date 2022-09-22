@@ -93,10 +93,27 @@ describe("Test GET /recommendations", () => {
 
     const result = await supertest(app).get(`/recommendations`);
     const resultLength = result.body.length;
-    
+
     expect(result.status).toBe(200);
     expect(resultLength).toBeLessThan(11);
     expect(result.body).toBeInstanceOf(Object);
+  });
+});
+
+describe("Test GET /recommendations/:id", () => {
+  it("Deve retornar status 200 se visualizar a recomendação pelo id corretamente", async () => {
+    const createdMusic = await musicFactory();
+
+    const result = await supertest(app).get(`/recommendations/${createdMusic.id}`).send();
+
+    expect(result.status).toBe(200);
+    expect(result.body).toMatchObject(createdMusic);
+  });
+
+  it("Deve retornar status 404 se a recomendação não existir", async () => {
+    const result = await supertest(app).get(`/recommendations/${0}`).send();
+
+    expect(result.status).toBe(404);
   });
 });
 
