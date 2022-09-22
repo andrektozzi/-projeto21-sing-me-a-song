@@ -47,6 +47,42 @@ describe("Test POST /recommendations/:id/upvote", () => {
   });
 });
 
+describe("Test POST /recommendations/:id/downvote", () => {
+  it("Deve retornar status 200 se votar na recomendação corretamente com score maior que -5", async () => {
+    const createdMusic = await musicFactory();
+
+    const result = await supertest(app).post(`/recommendations/${createdMusic.id}/downvote`).send();
+
+    expect(result.status).toBe(200);
+  });
+
+  it("Deve retornar status 200 se votar na recomendação corretamente com score menor que -5", async () => {
+    const createdMusic = await musicFactory();
+
+    await prisma.recommendation.update({
+      where: { name: createdMusic.name },
+      data: {
+        score: -5,
+      },
+    });
+
+    const result = await supertest(app).post(`/recommendations/${createdMusic.id}/downvote`).send();
+
+    const findMusic = await prisma.recommendation.findFirst({
+      where: { name: createdMusic.name },
+    });
+
+    expect(result.status).toBe(200);
+    expect(findMusic).toBeNull();
+  });
+
+  it("Deve retornar status 404 se votar em uma recomendação que não existe", async () => {
+    const result = await supertest(app).post(`/recommendations/${0}/downvote`).send();
+
+    expect(result.status).toBe(404);
+  });
+});
+
 afterAll(async () => {
     await prisma.$disconnect();
 });
