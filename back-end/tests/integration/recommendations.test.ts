@@ -83,6 +83,23 @@ describe("Test POST /recommendations/:id/downvote", () => {
   });
 });
 
+describe("Test GET /recommendations", () => {
+  it("Deve retornar status 200 se visualizar as recomendações corretamente", async () => {
+    let count = 0;
+    while (count < 13) {
+      await musicFactory();
+      count++;
+    }
+
+    const result = await supertest(app).get(`/recommendations`);
+    const resultLength = result.body.length;
+    
+    expect(result.status).toBe(200);
+    expect(resultLength).toBeLessThan(11);
+    expect(result.body).toBeInstanceOf(Object);
+  });
+});
+
 afterAll(async () => {
     await prisma.$disconnect();
 });
