@@ -1,8 +1,10 @@
 import app from "../../src/app";
 import supertest from "supertest";
 import { prisma } from "../../src/database";
-import musicFactory from "./factories/musicFactory";
-import musicDataFactory from "./factories/musicDataFactory"
+import musicFactory from "./factories/recommendationFactory";
+import musicDataFactory from "./factories/recommendationDataFactory"
+import musicListFactory from "./factories/recommendationListFactory";
+import isArraySorted from "./utils/isArraySorted";
 
 beforeEach(async () => {
   await prisma.$executeRaw`TRUNCATE TABLE "recommendations" RESTART IDENTITY`;
@@ -101,7 +103,7 @@ describe("Test GET /recommendations", () => {
 });
 
 describe("Test GET /recommendations/:id", () => {
-  it("Deve retornar status 200 se visualizar a recomendação pelo id corretamente", async () => {
+  it("Deve retornar status 200 se visualizar as recomendações pelo id corretamente", async () => {
     const createdMusic = await musicFactory();
 
     const result = await supertest(app).get(`/recommendations/${createdMusic.id}`).send();
@@ -114,6 +116,21 @@ describe("Test GET /recommendations/:id", () => {
     const result = await supertest(app).get(`/recommendations/${0}`).send();
 
     expect(result.status).toBe(404);
+  });
+});
+
+describe("Test GET /recommendations/top/:amount", () => {
+  it("Deve retornar status 200 se visualizar as recomendações corretamente", async () => {
+    const amount = 20;
+    await musicListFactory();
+
+    const result = await supertest(app).get(`/recommendations/top/${amount}`);
+    const isResultArraySorted = isArraySorted(result.body);
+
+    expect(isResultArraySorted).toBe(true);
+    expect(result.body.length).toBeLessThanOrEqual(amount);
+    expect(result.status).toBe(200);
+    expect(result.body).toBeInstanceOf(Object);
   });
 });
 
