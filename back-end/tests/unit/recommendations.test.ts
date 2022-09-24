@@ -126,3 +126,21 @@ describe("Test GET /recommendations", () => {
     expect(result).toBeInstanceOf(Object);
   });
 });
+
+describe("Test GET /recommendations/top/:amount", () => {
+  it("Deve retornar status 200 se visualizar as recomendações corretamente", async () => {
+    const musicList = await recommendationListFactory();
+    const amount = 3;
+
+    const musicListSorted = musicList.sort((a, b) => {
+        return b.score - a.score;
+      }).splice(0, amount);
+
+    jest.spyOn(recommendationRepository, "getAmountByScore").mockImplementationOnce((): any => {
+        return musicListSorted;
+      });
+
+    const result = recommendationService.getTop(amount);
+    expect(result).toBeInstanceOf(Object);
+  });
+});
