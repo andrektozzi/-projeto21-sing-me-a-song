@@ -1,63 +1,115 @@
 import { jest } from "@jest/globals";
-import { rejects } from "assert";
-import { recommendationRepository } from "../../src/repositories/recommendationRepository";
 import { recommendationService } from "../../src/services/recommendationsService";
-import musicDataFactory from "./factories/recommendationDataFactory";
-import musicListFactory from "./factories/recommendationListFactory";
+import { recommendationRepository } from "../../src/repositories/recommendationRepository";
+import createRecommendationDataFactory from "./factories/createRecommendationDataFactory";
+import recommendationDataFactory from "./factories/recommendationDataFactory";
+import recommendationListFactory from "./factories/recommendationListFactory";
+import { notFoundError } from "../../src/utils/errorUtils";
+import filterMusicList from "./utils/filterMusicList";
 
 describe("Test POST /recommendations", () => {
-    it("Deve retornar status 200 se postar a recomendação corretamente", async () => {
-        const music = await musicDataFactory();
-    
-        jest.spyOn(recommendationRepository, "findByName").mockImplementationOnce((): any => {});
-    
-        jest.spyOn(recommendationRepository, "create").mockImplementationOnce((): any => {});
-    
-        await recommendationService.insert(music);
-        expect(recommendationRepository.findByName).toBeCalled();
-    });
+  it("Deve retornar status 200 se postar a recomendação corretamente", async () => {
+    const recommendation = await createRecommendationDataFactory();
 
-    it("Should return 409 if registered a recommendation that already exists", async () => {
-        const music = await musicDataFactory();
-    
-        jest.spyOn(recommendationRepository, "findByName").mockImplementationOnce((): any => {
-            return { name: music.name, youtubeLink: music.youtubeLink };
-          });
-    
-        const result = recommendationService.insert(music);
-        expect(result).rejects.toEqual({
-          message: "Recommendations names must be unique",
-          type: "conflict",
-        });
+    jest.spyOn(recommendationRepository, "findByName").mockImplementationOnce((): any => {});
+
+    jest.spyOn(recommendationRepository, "create").mockImplementationOnce((): any => {});
+
+    await recommendationService.insert(recommendation);
+    expect(recommendationRepository.create).toBeCalled();
+  });
+
+  it("Deve retornar status 409 se cadastrar uma recomendação que já existe", async () => {
+    const recommendation = await createRecommendationDataFactory();
+
+    jest.spyOn(recommendationRepository, "findByName").mockImplementationOnce((): any => {
+        return {
+          name: recommendation.name,
+          youtubeLink: recommendation.youtubeLink
+        }
+      });
+
+    const result = recommendationService.insert(recommendation);
+    expect(result).rejects.toEqual({
+      message: "Recommendations names must be unique",
+      type: "conflict"
     });
+  });
 });
 
 describe("Test POST /recommendations/:id/upvote", () => {
   it("Deve retornar status 200 se votar na recomendação corretamente", async () => {
-    const music = await musicDataFactory();
-    const id = 1;
-    
+    const recommendation = await recommendationDataFactory();
+
     jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => {
-      return { id, name: music.name, youtubeLink: music.youtubeLink };
-    });
-    
+        return recommendation;
+      });
+
     jest.spyOn(recommendationRepository, "updateScore").mockImplementationOnce((): any => {});
-    
-    await recommendationService.upvote(id);
-    
+
+    await recommendationService.upvote(recommendation.id);
+
     expect(recommendationRepository.updateScore).toBeCalled();
   });
 
-  it("Should return 404 if voting for a recommendation that doesn't exist", async () => {
-    await musicDataFactory();
-    const id = 1;
-    
+  it("Deve retornar status 404 se votar na recomendação que não existe", async () => {
+    const recommendation = await recommendationDataFactory();
+
     jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => {});
-    
-    const result = recommendationService.upvote(id);
+
+    const result = recommendationService.upvote(recommendation.id);
     expect(result).rejects.toEqual({
       message: "",
-      type: "not_found",
+      type: "not_found"
+    });
+  });
+});
+
+describe ("Test POST /recommendations/:id/downvote", () => {
+  it("Deve retornar status 200 se votar na recomendação com score maior que -5 corretamente", async () => {
+    const recommendation = await recommendationDataFactory();
+
+    jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => {
+        return recommendation;
+      });
+
+    jest.spyOn(recommendationRepository, "updateScore").mockImplementationOnce((): any => {
+        return recommendation;
+      });
+
+    await recommendationService.downvote(recommendation.id);
+
+    expect(recommendationRepository.updateScore).toBeCalled();
+  });
+
+  it("Deve retornar status 200 se votar na recomendação com score menor que -5 corretamente", async () => {
+    const recommendation = await recommendationDataFactory();
+    recommendation.score = -6;
+
+    jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => {
+        return recommendation;
+      });
+
+    jest.spyOn(recommendationRepository, "updateScore").mockImplementationOnce((): any => {
+        return recommendation;
+      });
+
+    jest.spyOn(recommendationRepository, "remove").mockImplementationOnce((): any => {});
+
+    await recommendationService.downvote(recommendation.id);
+
+    expect(recommendationRepository.remove).toBeCalled();
+  });
+
+  it("Deve retornar status 404 se votar em uma recomendação que não existe", async () => {
+    const recommendation = await recommendationDataFactory();
+
+    jest.spyOn(recommendationRepository, "find").mockImplementationOnce((): any => {});
+
+    const result = recommendationService.downvote(recommendation.id);
+    expect(result).rejects.toEqual({
+      message: "",
+      type: "not_found"
     });
   });
 });

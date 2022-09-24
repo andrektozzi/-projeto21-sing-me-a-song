@@ -1,17 +1,12 @@
-import { faker } from "@faker-js/faker";
+import recommendationDataFactory from "./recommendationDataFactory";
 
-export default async function musicListFactory() {
+export default async function recommendationListFactory() {
   let count = 0;
   let musicList = [];
 
   while (count < 10) {
-    const fakerString = faker.random.alpha(11);
-    const music = {
-      id: count + 1,
-      name: faker.music.songName(),
-      youtubeLink: `https://youtu.be/${fakerString}`,
-      score: faker.datatype.number({ min: -5, max: 300 })
-    }
+    const music = await recommendationDataFactory();
+    music.id = count + 1;
 
     musicList.push(music);
     count++;
