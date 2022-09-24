@@ -144,3 +144,44 @@ describe("Test GET /recommendations/top/:amount", () => {
     expect(result).toBeInstanceOf(Object);
   });
 });
+
+describe("Test GET /recommendations/random", () => {
+  it("Deve retornar status 200 se visualizar a recomendação com score maior que 10 corretamente", async () => {
+    const musicList = await recommendationListFactory();
+    jest.spyOn(Math, "random").mockImplementationOnce(() => 0.4);
+
+    const recommendations = musicList.filter((el: any) => {
+      return el.score > 10;
+    });
+
+    jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => {
+        return recommendations;
+      });
+
+    const result = await recommendationService.getRandom();
+
+    expect(result).toBeInstanceOf(Object);
+    expect(result.score).toBeGreaterThan(10);
+  });
+
+  it("Deve retornar status 200 se visualizar a recomendação com score menor que 10 corretamente", async () => {
+    const recommendations = filterMusicList();
+    jest.spyOn(Math, "random").mockImplementationOnce(() => 0.8);
+
+    jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => {
+        return recommendations;
+      });
+
+    const result = await recommendationService.getRandom();
+
+    expect(result).toBeInstanceOf(Object);
+    expect(result.score).toBeLessThanOrEqual(10);
+  });
+
+  it("Deve retornar not found se a recomendação não existir", async () => {
+    jest.spyOn(recommendationRepository, "findAll").mockImplementation((): any => []);
+
+    const promise = recommendationService.getRandom();
+    expect(promise).rejects.toEqual(notFoundError());
+  });
+});
