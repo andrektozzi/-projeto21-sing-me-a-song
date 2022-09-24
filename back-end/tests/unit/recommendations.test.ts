@@ -113,3 +113,16 @@ describe ("Test POST /recommendations/:id/downvote", () => {
     });
   });
 });
+
+describe("Test GET /recommendations", () => {
+  it("Deve retornar status 200 se visualizar as recomendações corretamente", async () => {
+    const recommendationList = await recommendationListFactory();
+
+    jest.spyOn(recommendationRepository, "findAll").mockImplementationOnce((): any => {
+        return recommendationList;
+      });
+
+    const result = recommendationService.get();
+    expect(result).toBeInstanceOf(Object);
+  });
+});
