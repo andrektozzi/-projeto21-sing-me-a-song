@@ -1,9 +1,9 @@
-import musicFactory from "./recommendationFactory";
+import recommendationFactory from "./recommendationFactory";
 
-export default async function musicListFactory() {
+export default async function recommendationListFactory() {
   let count = 0;
-  while (count < 15) {
-    await musicFactory();
+  while (count < 13) {
+    await recommendationFactory();
     count++;
   }
 

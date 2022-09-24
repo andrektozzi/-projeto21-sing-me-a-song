@@ -1,9 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { prisma } from "../../../src/database";
-import musicDataFactory from "./recommendationDataFactory";
+import recommendationDataFactory from "./recommendationDataFactory";
 
-export default async function musicFactory() {
-  const music = await musicDataFactory();
+export default async function recommendationFactory() {
+  const music = await recommendationDataFactory();
   await prisma.recommendation.create({
     data: {
       ...music,
@@ -13,7 +13,7 @@ export default async function musicFactory() {
   await prisma.recommendation.update({
     where: { name: music.name },
     data: {
-      score: faker.datatype.number({ min: -5, max: 300 }),
+      score: faker.datatype.number({ min: -5, max: 20 }),
     },
   });
 
