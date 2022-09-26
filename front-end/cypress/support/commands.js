@@ -111,6 +111,22 @@ Cypress.Commands.add("viewRandom", () => {
     cy.get('[data-test-id="recommendation"]').should("have.length", 1);
   });
 });
+
+Cypress.Commands.add("viewTop", () => {
+  cy.visit("http://localhost:3000/");
+  
+  cy.request(
+    "POST",
+    "http://localhost:4000/e2e/recommendations/createlist",
+    {}
+  ).then(() => {
+    cy.get("[data-test-id='top']").click();
+
+    cy.url().should("equal", `http://localhost:3000/top`);
+
+    cy.get('[data-test-id="recommendation"]').should("have.length", 10);
+  });
+});
   
 Cypress.Commands.add("resetDatabase", () => {
   cy.request("POST", "http://localhost:4000/e2e/reset", {});
