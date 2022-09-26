@@ -1,13 +1,3 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-
 Cypress.Commands.add("createRecommendation", (recommendation) => {
   cy.visit("http://localhost:3000/");
 
@@ -88,6 +78,21 @@ Cypress.Commands.add("downvoteRecommendation", (recommendation, score) => {
 
       cy.wrap(res.body.score);
     });
+  });
+});
+
+Cypress.Commands.add("viewRecommendations", () => {
+  cy.visit("http://localhost:3000/");
+
+  cy.request(
+    "POST",
+    "http://localhost:4000/e2e/recommendations/createlist",
+    {}
+  ).then(() => {
+    cy.get('[data-test-id="recommendation"]').should(
+      "have.length.lessThan",
+      11
+    );
   });
 });
   
