@@ -18,3 +18,12 @@ export function updateScore(name: string, score: number) {
     },
   });
 }
+
+export async function create(name: string, youtubeLink: string) {
+  await prisma.recommendation.create({
+    data: {
+      name,
+      youtubeLink
+    }
+  });
+}

@@ -20,4 +20,9 @@ async function updateScore(req: Request, res: Response) {
   res.sendStatus(200);
 }
 
-export { reset, findByName, updateScore }
+async function createList(req: Request, res: Response) {
+  await e2eService.createList();
+  res.sendStatus(200);
+}
+
+export { reset, findByName, updateScore, createList };
