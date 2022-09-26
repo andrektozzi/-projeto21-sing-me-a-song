@@ -43,7 +43,13 @@ describe("View home", () => {
 });
 
 describe("View random", () => {
-  it("Testa se visualiza a quantidade de recomendações random", () => {
+  it("Testa se visualiza a quantidade correta de recomendações random", () => {
     cy.viewRandom();
+  });
+});
+
+describe("View top", () => {
+  it("Testa se visualiza a quantidade correta de recomendações top", () => {
+    cy.viewTop();
   });
 });
