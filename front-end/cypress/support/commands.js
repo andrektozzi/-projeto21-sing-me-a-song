@@ -95,6 +95,22 @@ Cypress.Commands.add("viewRecommendations", () => {
     );
   });
 });
+
+Cypress.Commands.add("viewRandom", () => {
+  cy.visit("http://localhost:3000/");
+
+  cy.request(
+    "POST",
+    "http://localhost:4000/e2e/recommendations/createlist",
+    {}
+  ).then(() => {
+    cy.get("[data-test-id='random']").click();
+
+    cy.url().should("equal", "http://localhost:3000/random");
+
+    cy.get('[data-test-id="recommendation"]').should("have.length", 1);
+  });
+});
   
 Cypress.Commands.add("resetDatabase", () => {
   cy.request("POST", "http://localhost:4000/e2e/reset", {});
