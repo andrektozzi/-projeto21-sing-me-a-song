@@ -16,6 +16,7 @@ app.use("/recommendations", recommendationRouter);
 app.use(errorHandlerMiddleware);
 
 if (process.env.NODE_ENV === 'test') {
+    console.log("test environment")
     app.use(e2eRouter);
 }  
 
