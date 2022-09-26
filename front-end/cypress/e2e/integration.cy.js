@@ -4,10 +4,16 @@ beforeEach( () => {
   cy.resetDatabase()
 });
 
-describe("Route /", () => {
-  it("Testa o usuário se cadastra com sucesso", () => {
+describe("Create recommendation", () => {
+  it("Testa se a recomendação é cadastrada corretamente", () => {
     const recommendation = createRecommendationDataFactory();
     cy.createRecommendation(recommendation);
-    cy.contains(recommendation.name).should("be.visible");
+  });
+});
+
+describe("Upvote recommendation", () => {
+  it("Testa se vota na recomendação corretamente", () => {
+    const recommendation = createRecommendationDataFactory();
+    cy.upvoteRecommendation(recommendation);
   });
 });
